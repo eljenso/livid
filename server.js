@@ -3,20 +3,7 @@ var Hapi = require('hapi'),
 
 server.connection({ port: 3000 });
 
-var io = require('socket.io')(server.listener);
-
-
-io.on('connection', function (socket) {
-
-    socket.emit('ping', 'what up');
-
-    socket.on('burp', function () {
-        socket.emit('Excuse you!');
-    });
-});
-
-
-
+var socket = require('./modules/socketLogic.js')(server.listener);
 
 server.views({
   engines: {
