@@ -1,7 +1,22 @@
-var Hapi = require('hapi');
+var Hapi = require('hapi'),
+    server = new Hapi.Server();
 
-var server = new Hapi.Server();
 server.connection({ port: 3000 });
+
+var io = require('socket.io')(server.listener);
+
+
+io.on('connection', function (socket) {
+
+    socket.emit('ping', 'what up');
+
+    socket.on('burp', function () {
+        socket.emit('Excuse you!');
+    });
+});
+
+
+
 
 server.views({
   engines: {
@@ -26,15 +41,7 @@ server.route({
 });
 
 
-server.route({
-    method: 'GET',
-    path: '/{name}',
-    handler: function (request, reply) {
-        reply('Hello, ' + encodeURIComponent(request.params.name) + '!');
-    }
-});
-
-
+// Static files
 server.route({
     method: 'GET',
     path: '/public/{param*}',
