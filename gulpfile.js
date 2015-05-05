@@ -9,14 +9,12 @@ gulp.task('default', function () {
   
   nodemon({
     script: 'server.js',
-    stdout: false,
-    ext: 'js jade'
+    stdout: true,
+    ext: 'js jade',
+    // execMap: {
+    //   js: 'node-debug'
+    // }
   }).on('readable', function() {
-    this.stdout.on('data', function(chunk) {
-      if (/^Server running/.test(chunk)) {
-        livereload.reload();
-      }
-      process.stdout.write(chunk);
-    })
+    livereload.reload();
   }
 )})
