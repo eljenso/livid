@@ -30,3 +30,5 @@ public/js/vendor
 
 
 *.sublime-workspace
+/output.txt
+/err.txt
