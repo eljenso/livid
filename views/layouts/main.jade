@@ -1,0 +1,33 @@
+//- Copyright(c) 2014 Jens Böttcher <eljenso.boettcher@gmail.com>
+
+doctype html
+html
+  head
+    meta(http-equiv='content-type', content='#{contentType}; charset=UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+
+    title #{website} - #{title}
+    link(rel='shortcut icon', type='image/png', href='/public/img/icon.png')
+
+    //- jQuery
+    script(src='/public/js/vendor/jquery/dist/jquery.min.js')
+
+    //- bootstrap
+    script(src='/public/js/vendor/bootstrap/dist/js/bootstrap.min.js')
+    link(rel='stylesheet', href='/public/js/vendor/bootstrap/dist/css/bootstrap.min.css')
+
+    link(rel='stylesheet', href='/public/css/style.css')
+
+  body
+    .container
+      .header
+        h3.page-header #{website}
+      .row
+        #leftbar.col-md-6.leftbar
+          block leftbar
+        .col-md-6.rightbar
+          block rightbar
+      //- hr
+      //- .footer
+        p.text-muted Proudly made with express, jade, less and bootstrap.
+    block dependencies

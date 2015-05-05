@@ -1,0 +1,29 @@
+{
+  "name": "PartyMate",
+  "version": "0.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/eljenso/party-mate.git"
+  },
+  "author": "Jens Böttcher <eljenso.boettcher@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eljenso/party-mate/issues"
+  },
+  "dependencies": {
+    "hapi": "~8.4.0",
+    "gulp": "~3.8.11",
+    "mopidy": "~0.5.0",
+    "handlebars": "~3.0.3",
+    "jade": "~1.9.2"
+  },
+  "devDependencies": {
+    "gulp-livereload": "~3.8.0",
+    "gulp-nodemon": "~2.0.3"
+  }
+}

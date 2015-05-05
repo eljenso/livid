@@ -1,0 +1,28 @@
+//- Copyright(c) 2014 Jens Böttcher <eljenso.boettcher@gmail.com>
+
+extend layouts/main
+
+block dependencies
+  //- script(src='socket.io/socket.io.js')
+  script(src='/public/js/index.js')
+
+block leftbar
+  #search 
+    p.text-muted Add a song
+    .input-group
+      input#input_search.form-control(placeholder='Search')
+      span.input-group-btn
+        button#btn_search.btn.btn-default
+          span.glyphicon.glyphicon-search
+  table.table.table-bordered
+    tbody#table_searchResults
+  hr.visible-xs-block.visible-sm-block
+
+block rightbar
+  div
+    center
+      h4 Playlist
+        br
+        small You can downvote every 5 seconds.
+    table.table
+      tbody#table_playlist
