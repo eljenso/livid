@@ -1,9 +1,12 @@
 var Hapi = require('hapi'),
     server = new Hapi.Server();
 
-server.connection({ port: 3000 });
+var config = require('./config.js');
+
+server.connection({ port: config.main.port });
 
 var socket = require('./modules/socketLogic.js')(server.listener);
+var mopidy = require('./modules/mopidyCom.js')();
 
 server.views({
   engines: {
