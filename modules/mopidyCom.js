@@ -2,9 +2,13 @@ var Q = require('q'),
     Mopidy = require('mopidy'),
     config = require('../config.js');
 
-var playlistTracks;
+var playlistTracksBackup;
+var playlistTracks = [];
 var userTracks = [];
 var mopidy;
+
+var queueTimeout;
+
 
 function init () {
   mopidy = Mopidy({
@@ -14,17 +18,19 @@ function init () {
   });
 
   mopidy.on("state:online", function () {
-
+      // Get fallback playlist
       getPlaylistTracks(config.mopidy.defaultPlaylist)
         .then(function (tracks) {
-          // Save fallback playlist
-          playlistTracks = tracks;
+          // Save randomized fallback playlist
+          playlistTracksBackup = tracks.sort(function() {
+            return 0.5 - Math.random()}
+          );
           // Clear current playlist
           return mopidy.tracklist.clear();
         })
         .then(function () {
           // Add next track to tracklist
-          return playNextTrack();
+          return queueNextTrack();
         })
         .then(function () {
           // Start playing music
@@ -37,15 +43,32 @@ function init () {
 }
 
 
-function playNextTrack () {
+function queueNextTrack () {
+  // clear old timeout!
+  clearInterval(queueTimeout);
+  
   var nextTrack;
 
-  // If no user tracks have been selected (yet), play tracks from fallback playlist
+  // 
+  if (playlistTracks.length === 0) {
+    playlistTracks = playlistTracksBackup;
+  };
+
+  // If no user tracks have been selected (yet), play track from fallback playlist
   if (userTracks.length > 0) {
     nextTrack = userTracks.shift();
   } else {
     nextTrack = playlistTracks.shift();
   };
+
+  // 5 seconds before the current track stops, queue next track
+  queueTimeout = setInterval(function () {
+    queueNextTrack();
+
+    //////////////////////////////////////////////////
+    // Not optimal: new tracks are added too often! //
+    //////////////////////////////////////////////////
+  }, nextTrack.length - 2*60*1000); 
 
   return mopidy.tracklist.add(null, null, nextTrack.uri, null);
 }
