@@ -1,4 +1,4 @@
-# party-mate
+# Parti Q
 
 * npm install
 * bower install
