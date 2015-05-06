@@ -1,13 +1,17 @@
 var Q = require('q'),
     Mopidy = require('mopidy'),
-    config = require('../config.js');
+    config = require('../config.js'),
+    mongoose = require('mongoose'),
+    Track = mongoose.model('Track');
 
-var playlistTracksBackup;
-var playlistTracks = [];
-var userTracks = [];
-var mopidy;
+var playlistManager = require('./playlistManager.js'),
+    socket = require('./socketLogic.js');
 
-var queueTimeout;
+var playlistTracks,
+    mopidy,
+    queueTimeout;
+
+var firstSong = true;
 
 
 function init () {
@@ -21,15 +25,16 @@ function init () {
       // Get fallback playlist
       getPlaylistTracks(config.mopidy.defaultPlaylist)
         .then(function (tracks) {
-          // Save randomized fallback playlist
-          playlistTracksBackup = tracks.sort(function() {
-            return 0.5 - Math.random()}
-          );
+          // Init playlist manager with default tracks
+          playlistManager.setDefaultTracks(tracks);
+
           // Clear current playlist
           return mopidy.tracklist.clear();
         })
         .then(function () {
-          // Add next track to tracklist
+          return playlistManager.repopulateDB();
+        })
+        .then(function () {
           return queueNextTrack();
         })
         .then(function () {
@@ -39,39 +44,62 @@ function init () {
         .done();
   });
 
+  mopidy.on('event:trackPlaybackStarted', function (track) {
+    track = track.tl_track.track;
+    Track.convert(track, function (currentTrack) {
+      socket.sendTrack(true, currentTrack);
+    });
+
+  });
+
   mopidy.connect();
 }
 
 
+
+function getCurrentTrack () {
+  var deferred = Q.defer();
+
+  mopidy.playback.getCurrentTrack()
+    .then(function (track) {
+      Track.convert(track, function (currentTrack) {
+        deferred.resolve(currentTrack);
+      })
+    })
+    .done();
+
+  return deferred.promise;
+}
+
+
+
 function queueNextTrack () {
+  var deferred = Q.defer();
+
   // clear old timeout!
   clearInterval(queueTimeout);
   
-  var nextTrack;
+  playlistManager.getNextTracks(1)
+    .then(function (nextTracks) {
+      // 5 seconds before the current track stops, queue next track
+      queueTimeout = setInterval(function () {
+        queueNextTrack();
+      }, /*nextTracks[0]._doc.length - (firstSong ? 5*1000 : 0)*/ 30*1000);
+      firstSong = false;
+      socket.sendTrack(false, nextTracks[0]._doc);
+      return mopidy.tracklist.add(null, null, nextTracks[0]._doc.uri, null);
+    })
+    .then(function () {
+      return playlistManager.removeNextTrack();
+    })
+    .then(function () {
+      deferred.resolve();
+    })
+    .done();
 
-  // 
-  if (playlistTracks.length === 0) {
-    playlistTracks = playlistTracksBackup;
-  };
-
-  // If no user tracks have been selected (yet), play track from fallback playlist
-  if (userTracks.length > 0) {
-    nextTrack = userTracks.shift();
-  } else {
-    nextTrack = playlistTracks.shift();
-  };
-
-  // 5 seconds before the current track stops, queue next track
-  queueTimeout = setInterval(function () {
-    queueNextTrack();
-
-    //////////////////////////////////////////////////
-    // Not optimal: new tracks are added too often! //
-    //////////////////////////////////////////////////
-  }, nextTrack.length - 2*60*1000); 
-
-  return mopidy.tracklist.add(null, null, nextTrack.uri, null);
+  return deferred.promise;
 }
+
 
 function getPlaylistTracks (playlistName) {
   var deferred = Q.defer();
@@ -89,4 +117,7 @@ function getPlaylistTracks (playlistName) {
   return deferred.promise;
 }
 
-module.exports = init;
+exports.init = init;
+
+exports.getCurrentTrack = getCurrentTrack;
+

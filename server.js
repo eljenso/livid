@@ -1,12 +1,32 @@
 var Hapi = require('hapi'),
-    server = new Hapi.Server();
+    server = new Hapi.Server(),
+    mongoose = require('mongoose'),
+    glob = require('glob');
 
 var config = require('./config.js');
 
 server.connection({ port: config.main.port });
 
-var socket = require('./modules/socketLogic.js')(server.listener);
-var mopidy = require('./modules/mopidyCom.js')();
+mongoose.connect(config.db);
+var db = mongoose.connection;
+db.on('error', function () {
+  throw new Error('unable to connect to database at ' + config.db);
+});
+
+var models = glob.sync('./models/*.js');
+models.forEach(function (model) {
+  require(model);
+});
+
+mongoose.connection.collections['tracks'].drop( function(err) {
+    console.log('collection dropped');
+});
+
+var socket = require('./modules/socketLogic.js');
+socket.init(server.listener);
+
+var mopidy = require('./modules/mopidyCom.js');
+mopidy.init();
 
 server.views({
   engines: {

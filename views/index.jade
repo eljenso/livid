@@ -1,4 +1,4 @@
-//- Copyright(c) 2014 Jens Böttcher <eljenso.boettcher@gmail.com>
+//- Copyright(c) 2015 Jens Böttcher <eljenso.boettcher@gmail.com>
 
 extend layouts/main
 
@@ -19,10 +19,11 @@ block leftbar
   hr.visible-xs-block.visible-sm-block
 
 block rightbar
-  div
+  .row
+    #currentTrack.col-xs-6
+    #nextTrack.col-xs-6
+  #queue
     center
-      h4 Playlist
-        br
-        small You can downvote every 5 seconds.
+      h4 Queue
     table.table
       tbody#table_playlist
