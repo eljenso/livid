@@ -15,7 +15,15 @@ $(function () {
       var songDetailsCell = document.createElement('td');
       $(songDetailsCell).text(tracks[i].artist + ' - ' + tracks[i].name);
 
-      $(tableRow).append(songDetailsCell);
+      var buttonCell = document.createElement('td');
+      var voteButton = document.createElement('button');
+      $(voteButton)
+        .attr('id', tracks[i].uri)
+        .html('<span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>')
+        .addClass('btn btn-default btn-lg');
+      $(buttonCell).append(voteButton);
+
+      $(tableRow).append(songDetailsCell, buttonCell);
       $('#table_playlist').append(tableRow);
     };
   }
