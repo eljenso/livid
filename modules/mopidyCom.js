@@ -84,7 +84,7 @@ function queueNextTrack () {
       // 5 seconds before the current track stops, queue next track
       queueTimeout = setInterval(function () {
         queueNextTrack();
-      }, /*nextTracks[0]._doc.length - (firstSong ? 5*1000 : 0)*/ 30*1000);
+      }, nextTracks[0]._doc.length - (firstSong ? 5*1000 : 0));
       firstSong = false;
       socket.sendTrack(false, nextTracks[0]._doc);
       return mopidy.tracklist.add(null, null, nextTracks[0]._doc.uri, null);
