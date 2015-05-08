@@ -88,10 +88,8 @@ $(function () {
 
 
 
-  function arrayToHashmap(array) {
-    var hashmap = {};
+  function arrayToHashmap(hashmap, array) {
     for (var i = array.length - 1; i >= 0; i--) { hashmap[array[i].uri] = array[i] };
-    return hashmap;
   }
 
 
@@ -132,13 +130,16 @@ $(function () {
           };
         })
         .then(function () {
-          currentSearchResult = arrayToHashmap(result);
+          arrayToHashmap(currentSearchResult, result);
           callback(result);
         })
     },
     onItemAdd: function (value, item) {
       addTrack(currentSearchResult[value]);
-
+    },
+    onDropdownClose: function (dropdown) {
+      currentSearchResult = {};
+      
       // Reset selectize
       this.clear(true);
       this.clearOptions();
@@ -146,10 +147,6 @@ $(function () {
   });
   selectize_track = selectize_track[0].selectize;
 
-
-  socket.on('ping', function (message) {
-    console.log(message);
-  });
 
 
   socket.on('nextTracks', function(nextTracks) {
@@ -159,11 +156,9 @@ $(function () {
   // Track info (current & next)
   socket.on('currentTrack', function (track) {
     trackInfo('currentTrack', track);
-    console.log(track);
   });
   socket.on('nextTrack', function (track) {
     trackInfo('nextTrack', track);
-    console.log(track);
   });
 
 }()); // end strict mode
