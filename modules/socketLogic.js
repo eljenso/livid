@@ -5,6 +5,10 @@ var socketIO = require('socket.io'),
 
 var io;
 
+/**
+ * Send current queue to a specific socket
+ * @param  {Socket} socket Socket which will receive the queue
+ */
 function sendNextTracks (socket) {
   playlistManager.getNextTracks(20)
     .then(function (nextTracks) {
@@ -13,6 +17,24 @@ function sendNextTracks (socket) {
     .done();
 }
 
+/**
+ * Send current queue to all sockets
+ */
+function broadcastNextTracks () {
+  setTimeout(function () {
+    playlistManager.getNextTracks(20)
+      .then(function (nextTracks) {
+        io.sockets.emit('nextTracks', nextTracks);
+      })
+      .done();
+  }, 200);
+}
+
+/**
+ * Send new next/current track to all sockets
+ * @param  {Boolean} isCurrent Whether track is the current track or not
+ * @param  {Track}  track     The track to send
+ */
 function sendTrack (isCurrent, track) {
   var broadcastEvent = (isCurrent ? 'currentTrack' : 'nextTrack');
   io.sockets.emit(broadcastEvent, track);
@@ -22,40 +44,50 @@ function init(listener) {
   io = socketIO(listener);
 
   io.on('connection', function (socket) {
+      /*
+       * Send current status
+       */
+      // Current track
       mopidyCom.getCurrentTrack()
         .then(function (track) {
           socket.emit('currentTrack', track);
         })
         .done();
 
+      // Current queue
       sendNextTracks(socket);
 
-      setInterval(function () {
-        sendNextTracks(socket);
-      }, 1 * 1000);
 
-
-
+      /*
+       * Setup voting
+       */
       var votedRecently = false;
 
+      /**
+       * Set votedRecently true and reset to false after timeout
+       */
       function voteTimeout () {
         votedRecently = true;
         setTimeout(function () {
           votedRecently = false;
-        }, config.user.voteDelay);
+        }, /*config.user.voteDelay*/ 1);
       }
 
+      // New track was received
       socket.on('addTrack', function (track) {
         if (!votedRecently) {
           playlistManager.addTrack(track);
           voteTimeout();
+          broadcastNextTracks();
         };
       });
 
+      // Vote for track was received
       socket.on('voteUp', function (trackUri) {
         if (!votedRecently) {
           playlistManager.voteUp(trackUri);
           voteTimeout();
+          broadcastNextTracks();
         };
       });
 
