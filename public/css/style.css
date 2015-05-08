@@ -4,3 +4,7 @@ body {
   font-family: 'Cabin', sans-serif;
   font-size: 18px;
 }
+
+#search {
+  padding-top: 10px;
+}
