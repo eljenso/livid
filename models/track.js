@@ -9,7 +9,8 @@ var TrackSchema = new Schema({
   uri: String,
   rating: Number,
   imageUri: String,
-  length: Number
+  length: Number,
+  dateAdded: { type: Date, default: Date.now }
 });
 TrackSchema.plugin(construct);
 
@@ -26,7 +27,7 @@ TrackSchema.statics.convert = function (mopidyTrack, cb) {
 
   if (mopidyTrack.artists.length > 1) {
     for (var i = 1; i < mopidyTrack.artists.length; i++) {
-      trackSchema.arist += ', ' + mopidyTrack.artists[i].name;
+      trackSchema.artist += ', ' + mopidyTrack.artists[i].name;
     };
   };
 

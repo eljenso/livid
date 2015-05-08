@@ -51,7 +51,7 @@ playlistManager.getNextTracks = function (numberOfTracks) {
     numberOfTracks = 10;
   };
 
-  var query = Track.find().sort('-rating').limit(numberOfTracks);
+  var query = Track.find().sort('-rating dateAdded').limit(numberOfTracks);
   var promise = query.exec();
   promise.addBack(function (err, tracks) {
     if (err) return console.error(err);
@@ -84,7 +84,30 @@ playlistManager.removeNextTrack = function() {
 }
 
 
+playlistManager.addTrack = function(newTrack) {
+  track = new Track(newTrack);
+
+  track.save(function (err, track) {
+    if (err) return console.error(err);
+  });
+}
+
+
+playlistManager.voteUp = function (trackUri) {
+  Track.findOne({ 'uri': trackUri }, function (err, track) {
+    if (err) return console.error(err);
+
+    track.rating++;
+    track.save(function (err, track) {
+      if (err) return console.error(err);
+    });
+  });
+}
+
+
 exports.setDefaultTracks = playlistManager.setDefaultTracks;
 exports.removeNextTrack = playlistManager.removeNextTrack;
 exports.repopulateDB = playlistManager.repopulateDB;
 exports.getNextTracks = playlistManager.getNextTracks;
+exports.addTrack = playlistManager.addTrack;
+exports.voteUp = playlistManager.voteUp;

@@ -27,17 +27,36 @@ function init(listener) {
           socket.emit('currentTrack', track);
         })
         .done();
-        
+
       sendNextTracks(socket);
 
       setInterval(function () {
         sendNextTracks(socket);
-      }, 2 * 1000)
+      }, 1 * 1000);
 
-      socket.emit('ping', 'what up');
 
-      socket.on('burp', function () {
-          console.log('Hello World!');
+
+      var votedRecently = false;
+
+      function voteTimeout () {
+        votedRecently = true;
+        setTimeout(function () {
+          votedRecently = false;
+        }, config.user.voteDelay);
+      }
+
+      socket.on('addTrack', function (track) {
+        if (!votedRecently) {
+          playlistManager.addTrack(track);
+          voteTimeout();
+        };
+      });
+
+      socket.on('voteUp', function (trackUri) {
+        if (!votedRecently) {
+          playlistManager.voteUp(trackUri);
+          voteTimeout();
+        };
       });
 
   });

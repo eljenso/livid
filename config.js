@@ -10,7 +10,10 @@ var config = {
     adress: 'ws://127.0.0.1:6680/mopidy/ws/',
     defaultPlaylist: 'Einweihung'
   },
-  db: 'mongodb://localhost/parti-q'
+  db: 'mongodb://localhost/parti-q',
+  user: {
+    voteDelay: 30 * 1000
+  }
 };
 
 module.exports = config;
