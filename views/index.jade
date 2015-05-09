@@ -14,15 +14,21 @@ block leftbar
     .col-xs-6
       h5 Up next:
       #nextTrack
-  #search
+  hr
+  .search.input-group.input-group-lg
     input#input_search.form-control(placeholder='Add a song')
-  table.table.table-bordered
-    tbody#table_searchResults
-  //- hr.visible-xs-block.visible-sm-block
+    span.input-group-btn
+      button#button_search.btn.btn-default Search
+  .searchResults
+    table#table_searchResults.table.table-striped
+      tbody#tbody_searchResults
+    center
+      button#button_clearSearch.btn.btn-default.btn-lg Clear search
+  hr.visible-xs-block.visible-sm-block
 
 block rightbar
   #queue
     center
       h3 Queue
-    table.table
-      tbody#table_playlist
+    table.table.table-striped
+      tbody#tbody_playlist

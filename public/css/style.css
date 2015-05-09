@@ -5,6 +5,11 @@ body {
   font-size: 18px;
 }
 
-#search {
-  padding-top: 10px;
+#table_searchResults {
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.searchResults {
+  display: none;
 }
