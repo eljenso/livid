@@ -10,6 +10,10 @@ body {
   margin-bottom: 5px;
 }
 
+.buttonCell {
+  text-align: right;
+}
+
 .searchResults {
   display: none;
 }

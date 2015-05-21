@@ -72,7 +72,6 @@ function getCurrentTrack () {
 }
 
 
-
 function queueNextTrack () {
   var deferred = Q.defer();
 
@@ -117,7 +116,37 @@ function getPlaylistTracks (playlistName) {
   return deferred.promise;
 }
 
+function searchTrack (query) {
+  var deferred = Q.defer();
+
+  mopidy.library.search({'any': [query]})
+    .then(function (results) {
+
+      var concatenatedResults = []
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].tracks) {
+          concatenatedResults = concatenatedResults.concat(results[i].tracks);
+        };
+      };
+
+      var convertedResults = [];
+      for (var i = 0; i < concatenatedResults.length; i++) {
+        Track.convert(concatenatedResults[i], function (currentTrack) {
+          convertedResults.push(currentTrack);
+
+          if (concatenatedResults.length === convertedResults.length) {
+            deferred.resolve(convertedResults);
+          };
+        })
+      };
+    })
+    .done();
+
+  return deferred.promise;
+};
+
 exports.init = init;
 
 exports.getCurrentTrack = getCurrentTrack;
+exports.searchTrack = searchTrack;
 

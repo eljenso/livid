@@ -43,6 +43,7 @@ function sendTrack (isCurrent, track) {
 function init(listener) {
   io = socketIO(listener);
 
+
   io.on('connection', function (socket) {
       /*
        * Send current status
@@ -76,6 +77,7 @@ function init(listener) {
       // New track was received
       socket.on('addTrack', function (track) {
         if (!votedRecently) {
+          track.rating = 1;
           playlistManager.addTrack(track);
           voteTimeout();
           broadcastNextTracks();
@@ -90,6 +92,15 @@ function init(listener) {
           broadcastNextTracks();
         };
       });
+
+
+      socket.on('search', function (query) {
+        mopidyCom.searchTrack(query)
+          .then(function (result) {
+            socket.emit('searchResult', result);
+          })
+          .done();
+      })
 
   });
 
