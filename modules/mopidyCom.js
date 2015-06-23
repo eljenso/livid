@@ -62,9 +62,13 @@ function getCurrentTrack () {
 
   mopidy.playback.getCurrentTrack()
     .then(function (track) {
-      Track.convert(track, function (currentTrack) {
-        deferred.resolve(currentTrack);
-      })
+      if (track) {
+        Track.convert(track, function (currentTrack) {
+          deferred.resolve(currentTrack);
+        })
+      } else {
+        deferred.reject('No current track');
+      }
     })
     .done();
 
