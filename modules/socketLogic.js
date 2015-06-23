@@ -20,7 +20,7 @@ function sendNextTracks (socket) {
 /**
  * Send current queue to all sockets
  */
-function broadcastNextTracks () {
+function broadcastUpcomingTracks () {
   setTimeout(function () {
     playlistManager.getNextTracks(20)
       .then(function (nextTracks) {
@@ -53,6 +53,9 @@ function init(listener) {
         .then(function (track) {
           socket.emit('currentTrack', track);
         })
+        .fail(function (message) {
+          console.log(message);
+        })
         .done();
 
       // Current queue
@@ -63,6 +66,7 @@ function init(listener) {
        * Setup voting
        */
       var votedRecently = false;
+      var alreadyVotedFor = [];
 
       /**
        * Set votedRecently true and reset to false after timeout
@@ -71,26 +75,34 @@ function init(listener) {
         votedRecently = true;
         setTimeout(function () {
           votedRecently = false;
-        }, /*config.user.voteDelay*/ 1);
+        }, config.user.voteDelay);
       }
 
       // New track was received
       socket.on('addTrack', function (track) {
         if (!votedRecently) {
+          alreadyVotedFor.push(track.uri);
           track.rating = 1;
           playlistManager.addTrack(track);
           voteTimeout();
-          broadcastNextTracks();
-        };
+          broadcastUpcomingTracks();
+        } else {
+          socket.emit('alreadyVoted', 'recently');
+        }
       });
 
       // Vote for track was received
       socket.on('voteUp', function (trackUri) {
-        if (!votedRecently) {
+        if (!votedRecently && alreadyVotedFor.indexOf(trackUri) < 0) {
+          alreadyVotedFor.push(trackUri);
           playlistManager.voteUp(trackUri);
           voteTimeout();
-          broadcastNextTracks();
-        };
+          broadcastUpcomingTracks();
+        } else if (alreadyVotedFor.indexOf(trackUri) >= 0) {
+          socket.emit('alreadyVoted', 'thisSong');
+        } else {
+          socket.emit('alreadyVoted', 'recently');
+        }
       });
 
 
