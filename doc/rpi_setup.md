@@ -103,7 +103,7 @@ Start mopidy again.
 There should be no errors and mopidy should successfully connect to spotify and load your playlists.
 
 
-## Install and setup Parti Q ##
+## Install, setup and start Parti Q ##
 Pull the repo:
 ```
 git clone https://github.com/eljenso/parti-q.git
@@ -116,9 +116,10 @@ npm install
 bower install
 ```
 
-Lastly, change the playlist in `config.js` by changing `defaultPlaylist` to your needs.
+Change the playlist in `config.js` by changing `defaultPlaylist` to your needs.
 
-
+Finally, start Parti Q:  
+`gulp`
 
 
 ## Troubleshouting ##
