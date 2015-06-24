@@ -13,7 +13,7 @@ sudo reboot
 ```
 
 ## Install requirements ##
-*Alternatively you can execute the [rpi2_raspbianWheezy.sh](install/rpi2_raspbianWheezy.sh) which will install all the dependencies listed below*
+*Alternatively you can execute the [rpi2_raspbianWheezy.sh](/install/rpi2_raspbianWheezy.sh) which will install all the dependencies listed below*
 
 First we need to install the dependencies:
 * node.js v0.10.x
