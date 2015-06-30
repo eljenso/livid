@@ -1,4 +1,4 @@
-# Parti Q
+# Livid
 
 Install instructions for the Raspberry Pi can be found [here](/doc/install/rpi_setup.md)
 

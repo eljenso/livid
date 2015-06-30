@@ -10,7 +10,7 @@ var config = {
     adress: 'ws://127.0.0.1:6680/mopidy/ws/',
     defaultPlaylist: 'Party 2015'
   },
-  db: 'mongodb://localhost/parti-q',
+  db: 'mongodb://localhost/livid',
   user: {
     voteDelay: 30 * 1000
   }

@@ -35,7 +35,7 @@ server.views({
   relativeTo: __dirname,
   path: 'views',
   context: {
-    website: 'Parti Q'
+    website: 'Livid'
   }
 });
 
