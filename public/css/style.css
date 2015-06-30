@@ -17,3 +17,7 @@ body {
 .searchResults {
   display: none;
 }
+
+.header h3 {
+  color: #6699CC;
+}
