@@ -7,18 +7,18 @@ var gulp = require('gulp'),
 
 gulp.task('develop', function () {
   livereload.listen();
-  
+
   nodemon({
     script: 'server.js',
     stdout: false,
     ext: 'js jade css',
     execMap: {
-      js: 'node --debug-brk=5560'
+      js: 'node --debug=5560'
     }
   }).on('readable', function() {
     this.stdout.pipe(fs.createWriteStream('output.txt'));
     this.stderr.pipe(fs.createWriteStream('err.txt'));
-    
+
     livereload.reload();
   }
 )});
