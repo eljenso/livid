@@ -50,6 +50,8 @@ function init () {
       socket.sendTrack(true, currentTrack);
     });
 
+    socket.broadcastUpcomingTracks();
+
   });
 
   mopidy.connect();
@@ -81,7 +83,7 @@ function queueNextTrack () {
 
   // clear old timeout!
   clearInterval(queueTimeout);
-  
+
   playlistManager.getNextTracks(1)
     .then(function (nextTracks) {
       // 5 seconds before the current track stops, queue next track
@@ -90,6 +92,7 @@ function queueNextTrack () {
       }, nextTracks[0]._doc.length - (firstSong ? 10*1000 : 0));
       firstSong = false;
       socket.sendTrack(false, nextTracks[0]._doc);
+      socket.broadcastUpcomingTracks();
       return mopidy.tracklist.add(null, null, nextTracks[0]._doc.uri, null);
     })
     .then(function () {
@@ -153,4 +156,3 @@ exports.init = init;
 
 exports.getCurrentTrack = getCurrentTrack;
 exports.searchTrack = searchTrack;
-

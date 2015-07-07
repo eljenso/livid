@@ -121,3 +121,4 @@ function init(listener) {
 exports.init = init;
 exports.io = io;
 exports.sendTrack = sendTrack;
+exports.broadcastUpcomingTracks = broadcastUpcomingTracks;
