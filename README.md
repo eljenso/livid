@@ -12,4 +12,4 @@ Install instructions for the Raspberry Pi can be found [here](/doc/install/rpi_s
 * Clone repo
 * `npm install`
 * `bower install`
-* `gulp`
+* `node server.js`
