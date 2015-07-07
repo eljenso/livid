@@ -32,3 +32,22 @@ block rightbar
       h3 Queue
     table.table.table-striped
       tbody#tbody_playlist
+
+block modals
+  #modal_instructions.modal
+    .modal-dialog.modal-lg
+      .modal-content
+        .modal-header
+          center
+            h2 Welcome to #{website}!
+        .modal-body
+          div On this page you can influence the music of this party.
+            br
+            | Add songs or give them hearts to push them up in the queue.
+          div To keep it fair and the distraction low there are a few rules:
+            ul
+              li Adding a song counts as voting.
+              li You may only vote on any song once.
+              li And you have to wait a few seconds between votes.
+        .modal-footer
+          button#btn_closeInstructionsModal.btn.btn-default(type="button" data-dismiss="modal") Close

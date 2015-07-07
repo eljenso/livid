@@ -21,3 +21,7 @@ body {
 .header h3 {
   color: #6699CC;
 }
+
+.modal-body > div {
+  margin-bottom: 30px;
+}

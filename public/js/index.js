@@ -4,6 +4,18 @@
 
 $(function () {
   'use strict';
+
+  /*
+   * First visit
+   */
+  if (Cookies.get('alreadyVisited') !== 'true' ) {
+    $('#modal_instructions').modal('show');
+  }
+  
+  $('#btn_closeInstructionsModal').click(function(event) {
+    Cookies.set('alreadyVisited', 'true', { expires: 365 });
+  })
+
   var socket = io();
 
   function buildQueueTable (tracks) {
