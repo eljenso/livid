@@ -1,6 +1,6 @@
 # Livid
 
-Install instructions for the Raspberry Pi can be found [here](/doc/install/rpi_setup.md)
+Install instructions for the Raspberry Pi can be found [here](/doc/rpi_setup.md)
 
 ## Depencencies ###
 * node.js 0.10
