@@ -51,6 +51,16 @@ server.route({
 });
 
 
+server.route({
+    method: 'GET',
+    path: '/history',
+    handler: function (request, reply) {
+        reply.view('history', {
+          title: 'History'
+        })
+    }
+});
+
 // Static files
 server.route({
     method: 'GET',
