@@ -119,7 +119,7 @@ bower install
 Change the playlist in `config.js` by changing `defaultPlaylist` to your needs.
 
 Finally, start Livid:  
-`gulp`
+`node server.js`
 
 
 ## Troubleshouting ##
