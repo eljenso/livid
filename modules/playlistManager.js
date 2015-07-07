@@ -1,7 +1,7 @@
 var Q = require('q'),
     config = require('../config.js'),
     mongoose = require('mongoose'),
-    Track = mongoose.model('Track');
+    QueueTrack = mongoose.model('QueueTrack');
 
 var playlistManager = {
   defaultTracks: []
@@ -27,8 +27,8 @@ playlistManager.repopulateDB = function (tracks) {
 
   var savedTracks = 0;
   for (var i = tracks.length - 1; i >= 0; i--) {
-    Track.convert(tracks[i], function (track) {
-      track = new Track(track);
+    QueueTrack.convert(tracks[i], function (track) {
+      track = new QueueTrack(track);
 
       track.save(function (err, track) {
         if (err) return console.error(err);
@@ -51,7 +51,7 @@ playlistManager.getNextTracks = function (numberOfTracks) {
     numberOfTracks = 10;
   };
 
-  var query = Track.find().sort('-rating dateAdded').limit(numberOfTracks);
+  var query = QueueTrack.find().sort('-rating dateAdded').limit(numberOfTracks);
   var promise = query.exec();
   promise.addBack(function (err, tracks) {
     if (err) return console.error(err);
@@ -76,7 +76,7 @@ playlistManager.getNextTracks = function (numberOfTracks) {
 playlistManager.removeNextTrack = function() {
   playlistManager.getNextTracks(1)
     .then(function (nextTracks) {
-      Track.remove({uri: nextTracks[0]._doc.uri}, function (err) {
+      QueueTrack.remove({uri: nextTracks[0]._doc.uri}, function (err) {
         if (err) return console.error(err);
       });
     })
@@ -85,7 +85,7 @@ playlistManager.removeNextTrack = function() {
 
 
 playlistManager.addTrack = function(newTrack) {
-  track = new Track(newTrack);
+  track = new QueueTrack(newTrack);
 
   track.save(function (err, track) {
     if (err) return console.error(err);
@@ -94,7 +94,7 @@ playlistManager.addTrack = function(newTrack) {
 
 
 playlistManager.voteUp = function (trackUri) {
-  Track.findOne({ 'uri': trackUri }, function (err, track) {
+  QueueTrack.findOne({ 'uri': trackUri }, function (err, track) {
     if (err) return console.error(err);
 
     track.rating++;

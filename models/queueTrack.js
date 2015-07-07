@@ -3,7 +3,7 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 
-var TrackSchema = new Schema({
+var QueueTrackSchema = new Schema({
   artist: String,
   name: String,
   uri: String,
@@ -12,11 +12,11 @@ var TrackSchema = new Schema({
   length: Number,
   dateAdded: { type: Date, default: Date.now }
 });
-TrackSchema.plugin(construct);
+QueueTrackSchema.plugin(construct);
 
 
-TrackSchema.statics.convert = function (mopidyTrack, cb) {
-  var trackSchema = {
+QueueTrackSchema.statics.convert = function (mopidyTrack, cb) {
+  var queueTrackSchema = {
     artist: mopidyTrack.artists[0].name,
     name: mopidyTrack.name,
     uri: mopidyTrack.uri,
@@ -27,12 +27,12 @@ TrackSchema.statics.convert = function (mopidyTrack, cb) {
 
   if (mopidyTrack.artists.length > 1) {
     for (var i = 1; i < mopidyTrack.artists.length; i++) {
-      trackSchema.artist += ', ' + mopidyTrack.artists[i].name;
+      queueTrackSchema.artist += ', ' + mopidyTrack.artists[i].name;
     };
   };
 
-  cb(trackSchema);
+  cb(queueTrackSchema);
 };
 
 
-mongoose.model('Track', TrackSchema);
+mongoose.model('QueueTrack', QueueTrackSchema);

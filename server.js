@@ -18,8 +18,8 @@ models.forEach(function (model) {
   require(model);
 });
 
-mongoose.connection.collections['tracks'].drop( function(err) {
-    console.log('collection dropped');
+mongoose.connection.collections['queuetracks'].drop( function(err) {
+    console.log('old queue tracks dropped');
 });
 
 var socket = require('./modules/socketLogic.js');

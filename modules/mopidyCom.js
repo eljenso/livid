@@ -2,9 +2,11 @@ var Q = require('q'),
     Mopidy = require('mopidy'),
     config = require('../config.js'),
     mongoose = require('mongoose'),
-    Track = mongoose.model('Track');
+    QueueTrack = mongoose.model('QueueTrack'),
+    HistoryTrack = mongoose.model('HistoryTrack');
 
 var playlistManager = require('./playlistManager.js'),
+    historyManager = require('./historyManager.js'),
     socket = require('./socketLogic.js');
 
 var playlistTracks,
@@ -46,7 +48,7 @@ function init () {
 
   mopidy.on('event:trackPlaybackStarted', function (track) {
     track = track.tl_track.track;
-    Track.convert(track, function (currentTrack) {
+    QueueTrack.convert(track, function (currentTrack) {
       socket.sendTrack(true, currentTrack);
     });
 
@@ -65,7 +67,7 @@ function getCurrentTrack () {
   mopidy.playback.getCurrentTrack()
     .then(function (track) {
       if (track) {
-        Track.convert(track, function (currentTrack) {
+        QueueTrack.convert(track, function (currentTrack) {
           deferred.resolve(currentTrack);
         })
       } else {
@@ -84,6 +86,8 @@ function queueNextTrack () {
   // clear old timeout!
   clearInterval(queueTimeout);
 
+  var trackUri;
+
   playlistManager.getNextTracks(1)
     .then(function (nextTracks) {
       // 5 seconds before the current track stops, queue next track
@@ -93,7 +97,11 @@ function queueNextTrack () {
       firstSong = false;
       socket.sendTrack(false, nextTracks[0]._doc);
       socket.broadcastUpcomingTracks();
+      trackUri = nextTracks[0]._doc.uri;
       return mopidy.tracklist.add(null, null, nextTracks[0]._doc.uri, null);
+    })
+    .then(function () {
+      return historyManager.addToHistory(trackUri);
     })
     .then(function () {
       return playlistManager.removeNextTrack();
@@ -138,7 +146,7 @@ function searchTrack (query) {
 
       var convertedResults = [];
       for (var i = 0; i < concatenatedResults.length; i++) {
-        Track.convert(concatenatedResults[i], function (currentTrack) {
+        QueueTrack.convert(concatenatedResults[i], function (currentTrack) {
           convertedResults.push(currentTrack);
 
           if (concatenatedResults.length === convertedResults.length) {

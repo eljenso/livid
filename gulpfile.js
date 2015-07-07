@@ -13,7 +13,7 @@ gulp.task('develop', function () {
     stdout: false,
     ext: 'js jade css',
     execMap: {
-      js: 'node --debug=5560'
+      js: 'node --debug-brk=5560'
     }
   }).on('readable', function() {
     this.stdout.pipe(fs.createWriteStream('output.txt'));
