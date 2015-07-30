@@ -18,9 +18,11 @@ models.forEach(function (model) {
   require(model);
 });
 
-mongoose.connection.collections['queuetracks'].drop( function(err) {
-    console.log('old queue tracks dropped');
-});
+if (process.env.ENV !== 'prod') {
+  mongoose.connection.collections['queuetracks'].drop( function(err) {
+      console.log('old queue tracks dropped');
+  });
+}
 
 var socket = require('./modules/socketLogic.js');
 socket.init(server.listener);
