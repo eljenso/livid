@@ -12,7 +12,7 @@ var config = {
   },
   db: 'mongodb://localhost/livid',
   user: {
-    voteDelay: 30 * 1000
+    voteDelay: 60 * 1000
   }
 };
 

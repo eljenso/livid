@@ -75,7 +75,7 @@ function init(listener) {
         votedRecently = true;
         setTimeout(function () {
           votedRecently = false;
-        }, config.user.voteDelay);
+        }, config.user.voteDelay + Math.floor(Math.random() * 6) * 10);
       }
 
       // New track was received
