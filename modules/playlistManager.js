@@ -23,7 +23,7 @@ playlistManager.repopulateDB = function (tracks) {
     .sort(function() {
       return 0.5 - Math.random()}
     )
-    .slice(0, 20);
+    .slice(0, 50);
 
   var savedTracks = 0;
   for (var i = tracks.length - 1; i >= 0; i--) {
