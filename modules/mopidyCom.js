@@ -30,18 +30,24 @@ function init () {
           // Init playlist manager with default tracks
           playlistManager.setDefaultTracks(tracks);
 
-          // Clear current playlist
-          return mopidy.tracklist.clear();
+          if (process.env.ENV !== 'prod') {
+            // Clear current playlist
+            return mopidy.tracklist.clear();
+          }
+          return 'true';
         })
         .then(function () {
           return playlistManager.repopulateDB();
         })
         .then(function () {
-          return queueNextTrack();
+          return queueNextTrack(true);
         })
         .then(function () {
           // Start playing music
           mopidy.playback.play();
+        })
+        .fail(function (err) {
+          console.log(err);
         })
         .done();
   });
@@ -80,7 +86,26 @@ function getCurrentTrack () {
 }
 
 
-function queueNextTrack () {
+function checkInit() {
+  var deferred = Q.defer();
+
+  Q.all([mopidy.playback.getCurrentTrack(), mopidy.playback.getTimePosition()])
+    .spread(function(currentTrack, timePosition) {
+      if (currentTrack) {
+        queueTimeout = setInterval(function () {
+          queueNextTrack();
+        }, currentTrack.length - timePosition - 10*1000);
+        deferred.reject('Already playing!');
+      } else {
+        deferred.resolve()
+      }
+    })
+    .done();
+
+  return deferred.promise;
+}
+
+function queueNextTrack (isInit) {
   var deferred = Q.defer();
 
   // clear old timeout!
@@ -88,7 +113,17 @@ function queueNextTrack () {
 
   var trackUri;
 
-  playlistManager.getNextTracks(1)
+  Q()
+    .then(function() {
+      if (isInit) {
+        return checkInit();
+      } else {
+        return true;
+      }
+    })
+    .then(function() {
+      return playlistManager.getNextTracks(1);
+    })
     .then(function (nextTracks) {
       // 5 seconds before the current track stops, queue next track
       queueTimeout = setInterval(function () {
@@ -108,6 +143,9 @@ function queueNextTrack () {
     })
     .then(function () {
       deferred.resolve();
+    })
+    .fail(function(err) {
+      deferred.reject(err);
     })
     .done();
 
