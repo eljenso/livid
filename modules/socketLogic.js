@@ -112,7 +112,20 @@ function init(listener) {
             socket.emit('searchResult', result);
           })
           .done();
-      })
+      });
+
+
+      socket.on('wakeup', function() {
+        mopidyCom.getCurrentTrack()
+          .then(function (track) {
+            sendNextTracks(socket);
+            socket.emit('currentTrack', track);
+          })
+          .fail(function (message) {
+            console.log(message);
+          })
+          .done();
+      });
 
   });
 
