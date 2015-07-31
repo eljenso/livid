@@ -87,7 +87,6 @@ function init(listener) {
           track.rating = 1;
           playlistManager.addTrack(track);
           voteTimeout();
-          broadcastUpcomingTracks();
         } else {
           socket.emit('alreadyVoted', 'recently');
         }
@@ -99,7 +98,6 @@ function init(listener) {
           alreadyVotedFor.push(trackUri);
           playlistManager.voteUp(trackUri);
           voteTimeout();
-          broadcastUpcomingTracks();
         } else if (alreadyVotedFor.indexOf(trackUri) >= 0) {
           socket.emit('alreadyVoted', 'thisSong');
         } else {

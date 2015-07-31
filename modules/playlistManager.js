@@ -3,6 +3,8 @@ var Q = require('q'),
     mongoose = require('mongoose'),
     QueueTrack = mongoose.model('QueueTrack');
 
+var socket = require('./socketLogic.js');
+
 var playlistManager = {
   defaultTracks: []
 }
@@ -85,10 +87,21 @@ playlistManager.removeNextTrack = function() {
 
 
 playlistManager.addTrack = function(newTrack) {
-  track = new QueueTrack(newTrack);
-
-  track.save(function (err, track) {
+  QueueTrack.findOne({ 'uri': newTrack.uri }, function (err, track) {
     if (err) return console.error(err);
+
+    // Only add track if not already in queue
+    if (track !== undefined) {
+      // Vote track up if already in queue
+      playlistManager.voteUp(newTrack.uri);
+    } else {
+      track = new QueueTrack(newTrack);
+
+      track.save(function (err, track) {
+        if (err) return console.error(err);
+        socket.broadcastUpcomingTracks();
+      });
+    }
   });
 }
 
@@ -100,6 +113,7 @@ playlistManager.voteUp = function (trackUri) {
     track.rating++;
     track.save(function (err, track) {
       if (err) return console.error(err);
+      socket.broadcastUpcomingTracks();
     });
   });
 }
