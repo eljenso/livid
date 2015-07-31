@@ -92,7 +92,7 @@ function checkInit() {
   Q.all([mopidy.playback.getCurrentTrack(), mopidy.playback.getTimePosition()])
     .spread(function(currentTrack, timePosition) {
       if (currentTrack) {
-        queueTimeout = setInterval(function () {
+        setTimeout(function () {
           queueNextTrack();
         }, currentTrack.length - timePosition - 10*1000);
         deferred.reject('Already playing!');
@@ -107,10 +107,6 @@ function checkInit() {
 
 function queueNextTrack (isInit) {
   var deferred = Q.defer();
-
-  // clear old timeout!
-  clearInterval(queueTimeout);
-
   var trackUri;
 
   Q()
@@ -126,7 +122,7 @@ function queueNextTrack (isInit) {
     })
     .then(function (nextTracks) {
       // 5 seconds before the current track stops, queue next track
-      queueTimeout = setInterval(function () {
+      setTimeout(function () {
         queueNextTrack();
       }, nextTracks[0]._doc.length - (firstSong ? 10*1000 : 0));
       firstSong = false;
