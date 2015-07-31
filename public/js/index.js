@@ -44,7 +44,12 @@ $(function () {
 
     var tableRow = document.createElement('tr');
     var cell = document.createElement('td');
-    $(cell).text('...');
+    $(cell).html('<span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>');
+    $(cell).attr('colspan', '3');
+    $(cell).css({
+      'text-align': 'center',
+      'color': '#777'
+    });
     $(tableRow).append(cell);
     $('#tbody_playlist').append(tableRow);
 
