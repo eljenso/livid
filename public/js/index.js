@@ -42,6 +42,12 @@ $(function () {
       $('#tbody_playlist').append(tableRow);
     };
 
+    var tableRow = document.createElement('tr');
+    var cell = document.createElement('td');
+    $(cell).text('...');
+    $(tableRow).append(cell);
+    $('#tbody_playlist').append(tableRow);
+
 
     $('.button-vote').click(function(event) {
       $(this).blur();
