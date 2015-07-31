@@ -91,7 +91,7 @@ playlistManager.addTrack = function(newTrack) {
     if (err) return console.error(err);
 
     // Only add track if not already in queue
-    if (track !== undefined) {
+    if (track) {
       // Vote track up if already in queue
       playlistManager.voteUp(newTrack.uri);
     } else {
