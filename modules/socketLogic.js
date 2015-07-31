@@ -5,12 +5,14 @@ var socketIO = require('socket.io'),
 
 var io;
 
+var clientPlaylistLength = 30;
+
 /**
  * Send current queue to a specific socket
  * @param  {Socket} socket Socket which will receive the queue
  */
 function sendNextTracks (socket) {
-  playlistManager.getNextTracks(20)
+  playlistManager.getNextTracks(clientPlaylistLength)
     .then(function (nextTracks) {
       socket.emit('nextTracks', nextTracks);
     })
@@ -22,7 +24,7 @@ function sendNextTracks (socket) {
  */
 function broadcastUpcomingTracks () {
   setTimeout(function () {
-    playlistManager.getNextTracks(20)
+    playlistManager.getNextTracks(clientPlaylistLength)
       .then(function (nextTracks) {
         io.sockets.emit('nextTracks', nextTracks);
       })
