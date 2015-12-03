@@ -44,7 +44,10 @@ server.views({
   }
 });
 
-
+/*
+ * Set routes
+ */
+// root
 server.route({
     method: 'GET',
     path: '/',
@@ -55,7 +58,7 @@ server.route({
     }
 });
 
-
+// History page
 server.route({
     method: 'GET',
     path: '/history',
