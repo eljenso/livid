@@ -1,34 +1,37 @@
 var Hapi = require('hapi'),
     server = new Hapi.Server(),
-    mongoose = require('mongoose'),
+    nedb = require('nedb'),
     glob = require('glob');
 
+// Load configfile
 var config = require('./config.js');
 
-server.connection({ port: config.main.port });
 
-mongoose.connect(config.db);
-var db = mongoose.connection;
-db.on('error', function () {
-  throw new Error('unable to connect to database at ' + config.db);
-});
+// Load database
+var db = {};
+db.queue = new nedb({ filename: config.db.queuePath, autoload: true });
+db.history = new nedb({ filename: config.db.historyPath, autoload: true });
 
-var models = glob.sync('./models/*.js');
-models.forEach(function (model) {
-  require(model);
-});
 
-if (process.env.ENV !== 'prod') {
-  mongoose.connection.collections['queuetracks'].drop( function(err) {
-      console.log('old queue tracks dropped');
-  });
-}
 
+// var models = glob.sync('./models/*.js');
+// models.forEach(function (model) {
+//   require(model);
+// });
+
+// if (process.env.ENV !== 'prod') {
+//   mongoose.connection.collections['queuetracks'].drop( function(err) {
+//       console.log('old queue tracks dropped');
+//   });
+// }
+
+/*
 var socket = require('./modules/socketLogic.js');
 socket.init(server.listener);
 
 var mopidy = require('./modules/mopidyCom.js');
 mopidy.init();
+*/
 
 server.views({
   engines: {
@@ -74,6 +77,9 @@ server.route({
     }
 });
 
+
+// Configure hapi server
+server.connection({ port: config.main.port });
 
 server.start(function () {
     console.log('Server running at:', server.info.uri);
