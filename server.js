@@ -1,47 +1,68 @@
 var Hapi = require('hapi'),
     server = new Hapi.Server(),
-    mongoose = require('mongoose'),
     glob = require('glob');
 
+// Load configfile
 var config = require('./config.js');
 
-server.connection({ port: config.main.port });
 
-mongoose.connect(config.db);
-var db = mongoose.connection;
-db.on('error', function () {
-  throw new Error('unable to connect to database at ' + config.db);
-});
-
-var models = glob.sync('./models/*.js');
-models.forEach(function (model) {
-  require(model);
-});
-
-if (process.env.ENV !== 'prod') {
-  mongoose.connection.collections['queuetracks'].drop( function(err) {
-      console.log('old queue tracks dropped');
-  });
-}
-
-var socket = require('./modules/socketLogic.js');
-socket.init(server.listener);
 
 var mopidy = require('./modules/mopidyCom.js');
 mopidy.init();
 
-server.views({
-  engines: {
-    jade: require('jade')
-  },
-  relativeTo: __dirname,
-  path: 'views',
-  context: {
-    website: 'Livid'
-  }
+// Configure hapi server
+server.connection({ port: config.main.port });
+
+var socket;
+server.register(require('hapio'), function(err) {
+  if (err) throw err;
+  socket = require('./modules/socketLogic.js');
+  socket.init(server.plugins.hapio.io);
 });
 
 
+// View engine
+server.register(require('vision'), function (err) {
+  if (err) {
+    throw err;
+  }
+
+  server.views({
+    engines: {
+      jade: require('jade')
+    },
+    relativeTo: __dirname,
+    path: 'views',
+    context: {
+      website: 'Livid'
+    }
+  });
+});
+
+// Static files
+server.register(require('inert'), function (err) {
+
+  if (err) {
+    throw err;
+  }
+
+  // Static files
+  server.route({
+      method: 'GET',
+      path: '/public/{param*}',
+      handler: {
+          directory: {
+              path: 'public'
+          }
+      }
+  });
+});
+
+
+/*
+ * Set routes
+ */
+// root
 server.route({
     method: 'GET',
     path: '/',
@@ -52,7 +73,7 @@ server.route({
     }
 });
 
-
+// History page
 server.route({
     method: 'GET',
     path: '/history',
@@ -60,17 +81,6 @@ server.route({
         reply.view('history', {
           title: 'History'
         })
-    }
-});
-
-// Static files
-server.route({
-    method: 'GET',
-    path: '/public/{param*}',
-    handler: {
-        directory: {
-            path: 'public'
-        }
     }
 });
 

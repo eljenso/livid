@@ -31,3 +31,5 @@ public/vendor
 
 /output.txt
 /err.txt
+
+*.db

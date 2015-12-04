@@ -10,7 +10,10 @@ var config = {
     adress: 'ws://127.0.0.1:6680/mopidy/ws/',
     defaultPlaylist: 'Party 2015'
   },
-  db: 'mongodb://localhost/livid',
+  db: {
+    queuePath: 'queue.db',
+    historyPath: 'history.db'
+  },
   user: {
     voteDelay: 60 * 1000
   }

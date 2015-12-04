@@ -42,8 +42,8 @@ function sendTrack (isCurrent, track) {
   io.sockets.emit(broadcastEvent, track);
 }
 
-function init(listener) {
-  io = socketIO(listener);
+function init(hapio) {
+  io = hapio;
 
 
   io.on('connection', function (socket) {
