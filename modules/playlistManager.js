@@ -1,9 +1,11 @@
 var Q = require('q'),
-    config = require('../config.js'),
-    mongoose = require('mongoose'),
-    QueueTrack = mongoose.model('QueueTrack');
+    nedb = require('nedb'),
+    config = require('../config.js');
 
+
+var dbHandler = require('../modules/dbHandler.js');
 var socket = require('./socketLogic.js');
+var models = require('../modules/models.js');
 
 var playlistManager = {
   defaultTracks: []
@@ -29,17 +31,26 @@ playlistManager.repopulateDB = function (tracks) {
 
   var savedTracks = 0;
   for (var i = tracks.length - 1; i >= 0; i--) {
-    QueueTrack.convert(tracks[i], function (track) {
-      track = new QueueTrack(track);
+    var track = new models.Track(
+      tracks[i].artists[0].name,
+      tracks[i].name,
+      tracks[i].uri,
+      0,
+      '',
+      tracks[i].length
+    );
 
-      track.save(function (err, track) {
-        if (err) return console.error(err);
+    dbHandler.saveTrack(track)
+      .then(function(savedTrack) {
         savedTracks++;
         if (savedTracks === tracks.length) {
           deferred.resolve();
         };
-      });
-    });
+      })
+      .fail(function(err) {
+        deferred.reject(err);
+      })
+      .done();
   };
 
   return deferred.promise;
@@ -53,23 +64,14 @@ playlistManager.getNextTracks = function (numberOfTracks) {
     numberOfTracks = 10;
   };
 
-  var query = QueueTrack.find().sort('-rating dateAdded').limit(numberOfTracks);
-  var promise = query.exec();
-  promise.addBack(function (err, tracks) {
-    if (err) return console.error(err);
-    if (tracks.length < numberOfTracks) {
-      playlistManager.repopulateDB()
-        .then(function () {
-          return playlistManager.getNextTracks(numberOfTracks);
-        })
-        .then(function (nextTracks) {
-          deferred.resolve(nextTracks);
-        })
-        .done();
-    } else {
-      deferred.resolve(tracks);
-    }
-  });
+  dbHandler.getNextTracks('queue', numberOfTracks)
+    .then(function (nextTracks) {
+      deferred.resolve(nextTracks);
+    })
+    .fail(function(err) {
+      deferred.reject(err);
+    })
+    .done();
 
   return deferred.promise;
 }
@@ -78,45 +80,52 @@ playlistManager.getNextTracks = function (numberOfTracks) {
 playlistManager.removeNextTrack = function() {
   playlistManager.getNextTracks(1)
     .then(function (nextTracks) {
-      QueueTrack.remove({uri: nextTracks[0]._doc.uri}, function (err) {
-        if (err) return console.error(err);
-      });
+      return dbHandler.deleteTrack(nextTracks[0].uri);
+    })
+    .fail(function(err) {
+      if (err) return console.error(err);
     })
     .done();
-}
+};
 
 
 playlistManager.addTrack = function(newTrack) {
-  QueueTrack.findOne({ 'uri': newTrack.uri }, function (err, track) {
-    if (err) return console.error(err);
+  dbHandler.getTrack(newTrack.uri)
+    .then(function(track) {
+      // Only add track if not already in queue
+      if (track) {
+        // Vote track up if already in queue
+        playlistManager.voteUp(newTrack.uri);
+      } else {
+        track = new QueueTrack(newTrack);
 
-    // Only add track if not already in queue
-    if (track) {
-      // Vote track up if already in queue
-      playlistManager.voteUp(newTrack.uri);
-    } else {
-      track = new QueueTrack(newTrack);
-
-      track.save(function (err, track) {
-        if (err) return console.error(err);
-        socket.broadcastUpcomingTracks();
-      });
-    }
-  });
-}
+        return dbHandler.saveTrack(track)
+          .then(function(savedTrack) {
+            socket.broadcastUpcomingTracks();
+          })
+          .fail(function(err) {
+            deferred.reject(err);
+          })
+          .done();
+      }
+    })
+    .fail(function(err) {
+      if (err) return console.error(err);
+    })
+    .done();
+};
 
 
 playlistManager.voteUp = function (trackUri) {
-  QueueTrack.findOne({ 'uri': trackUri }, function (err, track) {
-    if (err) return console.error(err);
-
-    track.rating++;
-    track.save(function (err, track) {
-      if (err) return console.error(err);
+  dbHandler.voteUp(trackUri, 'queue')
+    .then(function(newTrack) {
       socket.broadcastUpcomingTracks();
-    });
-  });
-}
+    })
+    .fail(function(err) {
+      if (err) return console.error(err);
+    })
+    .done();
+};
 
 
 exports.setDefaultTracks = playlistManager.setDefaultTracks;

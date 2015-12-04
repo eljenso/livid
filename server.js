@@ -1,33 +1,11 @@
 var Hapi = require('hapi'),
     server = new Hapi.Server(),
-    nedb = require('nedb'),
     glob = require('glob');
 
 // Load configfile
 var config = require('./config.js');
 
 
-// Load database
-var db = {};
-db.queue = new nedb({ filename: config.db.queuePath, autoload: true });
-db.history = new nedb({ filename: config.db.historyPath, autoload: true });
-
-
-
-// var models = glob.sync('./models/*.js');
-// models.forEach(function (model) {
-//   require(model);
-// });
-
-// if (process.env.ENV !== 'prod') {
-//   mongoose.connection.collections['queuetracks'].drop( function(err) {
-//       console.log('old queue tracks dropped');
-//   });
-// }
-
-/*
-var socket = require('./modules/socketLogic.js');
-socket.init(server.listener);
 
 var mopidy = require('./modules/mopidyCom.js');
 mopidy.init();

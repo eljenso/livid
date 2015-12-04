@@ -1,9 +1,8 @@
 var Q = require('q'),
     Mopidy = require('mopidy'),
-    config = require('../config.js'),
-    mongoose = require('mongoose'),
-    QueueTrack = mongoose.model('QueueTrack'),
-    HistoryTrack = mongoose.model('HistoryTrack');
+    config = require('../config.js');
+
+var models = require('./models.js');
 
 var playlistManager = require('./playlistManager.js'),
     historyManager = require('./historyManager.js'),
@@ -54,9 +53,16 @@ function init () {
 
   mopidy.on('event:trackPlaybackStarted', function (track) {
     track = track.tl_track.track;
-    QueueTrack.convert(track, function (currentTrack) {
-      socket.sendTrack(true, currentTrack);
-    });
+    var currentTrack = new models.Track(
+      track.artists[0].name,
+      track.name,
+      track.uri,
+      0,
+      '',
+      track.length
+    );
+
+    socket.sendTrack(true, currentTrack);
 
     socket.broadcastUpcomingTracks();
 
@@ -73,9 +79,14 @@ function getCurrentTrack () {
   mopidy.playback.getCurrentTrack()
     .then(function (track) {
       if (track) {
-        QueueTrack.convert(track, function (currentTrack) {
-          deferred.resolve(currentTrack);
-        })
+        deferred.resolve(new models.Track(
+          track.artists[0].name,
+          track.name,
+          track.uri,
+          0,
+          '',
+          track.length
+        ));
       } else {
         deferred.reject('No current track');
       }
@@ -124,12 +135,12 @@ function queueNextTrack (isInit) {
       // 5 seconds before the current track stops, queue next track
       setTimeout(function () {
         queueNextTrack();
-      }, nextTracks[0]._doc.length - (firstSong ? 10*1000 : 0));
+      }, nextTracks[0].length - (firstSong ? 10*1000 : 0));
       firstSong = false;
-      socket.sendTrack(false, nextTracks[0]._doc);
+      socket.sendTrack(false, nextTracks[0]);
       socket.broadcastUpcomingTracks();
-      trackUri = nextTracks[0]._doc.uri;
-      return mopidy.tracklist.add(null, null, nextTracks[0]._doc.uri, null);
+      trackUri = nextTracks[0].uri;
+      return mopidy.tracklist.add(null, null, nextTracks[0].uri, null);
     })
     .then(function () {
       return historyManager.addToHistory(trackUri);
@@ -180,13 +191,19 @@ function searchTrack (query) {
 
       var convertedResults = [];
       for (var i = 0; i < concatenatedResults.length; i++) {
-        QueueTrack.convert(concatenatedResults[i], function (currentTrack) {
-          convertedResults.push(currentTrack);
+        convertedResults.push(new models.Track(
+          concatenatedResults[i].artists[0].name,
+          concatenatedResults[i].name,
+          concatenatedResults[i].uri,
+          0,
+          '',
+          concatenatedResults[i].length
+        ));
 
-          if (concatenatedResults.length === convertedResults.length) {
-            deferred.resolve(convertedResults);
-          };
-        })
+        if (concatenatedResults.length === convertedResults.length) {
+          deferred.resolve(convertedResults);
+        };
+
       };
     })
     .done();
