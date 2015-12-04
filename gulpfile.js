@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 
 
 
-gulp.task('develop', function () {
+gulp.task('dev', function () {
   livereload.listen();
 
   nodemon({
@@ -20,8 +20,9 @@ gulp.task('develop', function () {
     this.stderr.pipe(fs.createWriteStream('err.txt'));
 
     livereload.reload();
-  }
-)});
+  });
+
+});
 
 gulp.task('default', function () {
   nodemon({
